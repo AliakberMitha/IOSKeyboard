@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="LSD Keyboard">
-<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
 <title>LSD Keyboard</title>
 <style>
-@font-face { font-family:'KanzLSD'; src:url('assets/KanzLSD.ttf') format('truetype'); }
+@font-face { font-family:'KanzLSD'; src:url('KanzLSD.ttf') format('truetype'); }
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 body { font-family:system-ui,sans-serif; background:#1E1B16; min-height:100vh; padding:10px; color:#F5EBD8; }
 h1 { font-size:17px; color:#C9A24B; text-align:center; padding:6px 0 10px; }
@@ -172,9 +172,9 @@ const grid=document.getElementById('stickers');
 for(let i=1;i<=17;i++){
   const fn='sticker_'+String(i).padStart(2,'0')+'.webp';
   const img=document.createElement('img');
-  img.src='stickers/'+fn; img.loading='lazy';
+  img.src=fn; img.loading='lazy';
   img.onclick=async()=>{
-    const blob=await (await fetch('stickers/'+fn)).blob();
+    const blob=await (await fetch(fn)).blob();
     shareBlob(blob, fn, 'image/webp');
   };
   grid.appendChild(img);
