@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LSD Keyboard">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>LSD Keyboard</title>
+<style>
+@font-face { font-family:'KanzLSD'; src:url('assets/KanzLSD.ttf') format('truetype'); }
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body { font-family:system-ui,sans-serif; background:#1E1B16; min-height:100vh; padding:10px; color:#F5EBD8; }
+h1 { font-size:17px; color:#C9A24B; text-align:center; padding:6px 0 10px; }
+.card { background:#2B2620; border-radius:14px; padding:12px; margin-bottom:10px; }
+textarea { width:100%; min-height:84px; font-size:22px; padding:10px; border:1.5px solid #54483A;
+  border-radius:10px; direction:rtl; font-family:'KanzLSD',serif; line-height:2; resize:vertical;
+  background:#1E1B16; color:#F5EBD8; }
+#preview { direction:rtl; text-align:center; font-family:'KanzLSD',serif; padding:22px 14px;
+  border-radius:10px; min-height:70px; line-height:2.2; word-wrap:break-word;
+  background:#FDF8EE; color:#3D2B00; }
+.chips { display:flex; gap:6px; overflow-x:auto; padding:6px 0; }
+.chip { flex:0 0 auto; font-family:'KanzLSD',serif; font-size:26px; color:#3D2B00;
+  background:#F5EBD8; border:1px solid #C9A24B; border-radius:10px; padding:4px 14px; cursor:pointer; }
+.chip:active { background:#E7D9BC; }
+.lbl { font-size:12px; color:#9A8B6E; margin:4px 2px; }
+.row { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+.row label { font-size:12px; color:#9A8B6E; }
+input[type=range] { flex:1; min-width:100px; }
+input[type=color] { width:34px; height:28px; border:none; background:none; }
+.btns { display:flex; gap:8px; margin-top:10px; }
+button.act { flex:1; padding:12px; font-size:15px; font-weight:600; border:none; border-radius:10px; cursor:pointer; }
+#shareBtn { background:#25D366; color:#fff; }
+#saveBtn { background:#54483A; color:#F5EBD8; }
+#copyBtn { background:#C9A24B; color:#2B2620; }
+.grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.grid img { width:100%; border-radius:10px; background:#1E1B16; cursor:pointer; }
+.hint { font-size:11px; color:#7B6E58; text-align:center; margin-top:8px; line-height:1.6; }
+</style>
+</head>
+<body>
+<h1>LSD Keyboard &#x2726; Composer</h1>
+
+<div class="card">
+  <textarea id="txt" placeholder="اكتب هنا ..."></textarea>
+  <div class="lbl">Symbols — tap to insert</div>
+  <div class="chips" id="chips"></div>
+  <div class="row">
+    <label>Size</label><input type="range" id="size" min="24" max="88" value="46">
+    <label>Text</label><input type="color" id="fg" value="#3d2b00">
+    <label>BG</label><input type="color" id="bg" value="#fdfaf2">
+  </div>
+</div>
+
+<div class="card" style="padding:8px;"><div id="preview"></div></div>
+
+<div class="btns">
+  <button class="act" id="shareBtn">&#x1F4E4; Share Image</button>
+  <button class="act" id="saveBtn">&#x2B07; Save</button>
+  <button class="act" id="copyBtn">&#x29C9; Copy Text</button>
+</div>
+
+<div class="card" style="margin-top:10px;">
+  <div class="lbl">Stickers — tap to share</div>
+  <div class="grid" id="stickers"></div>
+</div>
+
+<p class="hint">Type with your phone's Arabic keyboard. Preview and images show the true LSD font.<br>
+On iPhone: open in Safari &rarr; Share &rarr; "Add to Home Screen" to install.</p>
+
+<script>
+const txt=document.getElementById('txt'), size=document.getElementById('size'),
+      fg=document.getElementById('fg'), bg=document.getElementById('bg'),
+      preview=document.getElementById('preview');
+
+// sahebo signs (plain chars the font draws as signs) + honorific sequences with PUA display forms
+const saheboSigns = [">", "<", "\u00D7", "\u00F7"];
+const honorifics = [
+  [" \u0635\u0644\u0639 ", "\uE000"],
+  ["\u0637 \u0639 ",       "\uE001"],
+  [" \u0635 \u0639 ",      "\uE002"],
+  [" \u062F \u0645 ",      "\uE003"],
+  [" \u0639 \u0645 ",      "\uE004"],
+  [" \u0631\u0636 ",       "\uE005"],
+  [" \u0642\u0633 ",       "\uE006"]
+];
+
+function displayForm(t){
+  for(const [seq,pua] of honorifics) t=t.split(seq).join(pua);
+  return t;
+}
+
+// chips
+const chipBox=document.getElementById('chips');
+for(const ch of saheboSigns) addChip(ch, ch);
+for(const [seq,pua] of honorifics) addChip(pua, seq);
+function addChip(label, insert){
+  const b=document.createElement('button');
+  b.className='chip'; b.textContent=label;
+  b.onclick=()=>{ 
+    const s=txt.selectionStart??txt.value.length, e=txt.selectionEnd??s;
+    txt.setRangeText(insert, s, e, 'end'); txt.focus(); update();
+  };
+  chipBox.appendChild(b);
+}
+
+function update(){
+  preview.style.fontSize=size.value+'px';
+  preview.style.color=fg.value;
+  preview.style.backgroundColor=bg.value;
+  preview.textContent=displayForm(txt.value);
+}
+[txt,size,fg,bg].forEach(el=>el.addEventListener('input',update));
+update();
+
+async function renderPNG(){
+  await document.fonts.load(size.value+"px 'KanzLSD'");
+  const scale=2, pad=50*scale, fs=parseInt(size.value)*scale, lineH=fs*2.2;
+  const maxW=1080*scale-pad*2;
+  const c=document.createElement('canvas'), x=c.getContext('2d');
+  x.font=fs+"px 'KanzLSD'";
+  const shown=displayForm(txt.value);
+  const lines=[];
+  for(const raw of shown.split('\n')){
+    if(!raw.trim()){lines.push('');continue;}
+    let cur='';
+    for(const w of raw.split(' ')){
+      const t=cur?cur+' '+w:w;
+      if(x.measureText(t).width>maxW && cur){lines.push(cur);cur=w;}
+      else cur=t;
+    }
+    lines.push(cur);
+  }
+  let widest=0; lines.forEach(l=>widest=Math.max(widest,x.measureText(l).width));
+  c.width=Math.max(widest+pad*2, 480*scale);
+  c.height=lines.length*lineH+pad*2;
+  const g=c.getContext('2d');
+  g.fillStyle=bg.value; g.fillRect(0,0,c.width,c.height);
+  g.font=fs+"px 'KanzLSD'"; g.fillStyle=fg.value;
+  g.direction='rtl'; g.textAlign='center'; g.textBaseline='middle';
+  lines.forEach((l,i)=>g.fillText(l, c.width/2, pad+lineH*(i+0.5)));
+  return new Promise(res=>c.toBlob(res,'image/png'));
+}
+
+async function shareBlob(blob, name, mime){
+  const file=new File([blob], name, {type:mime});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file]}); return true; }catch(e){ return true; }
+  }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name; a.click();
+  return false;
+}
+
+document.getElementById('shareBtn').onclick=async()=>{
+  if(!txt.value.trim()) return;
+  shareBlob(await renderPNG(),'lsd.png','image/png');
+};
+document.getElementById('saveBtn').onclick=async()=>{
+  if(!txt.value.trim()) return;
+  const blob=await renderPNG();
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='lsd.png'; a.click();
+};
+document.getElementById('copyBtn').onclick=async()=>{
+  try{ await navigator.clipboard.writeText(txt.value); }catch(e){}
+};
+
+// sticker gallery
+const grid=document.getElementById('stickers');
+for(let i=1;i<=17;i++){
+  const fn='sticker_'+String(i).padStart(2,'0')+'.webp';
+  const img=document.createElement('img');
+  img.src='stickers/'+fn; img.loading='lazy';
+  img.onclick=async()=>{
+    const blob=await (await fetch('stickers/'+fn)).blob();
+    shareBlob(blob, fn, 'image/webp');
+  };
+  grid.appendChild(img);
+}
+</script>
+</body>
+</html>

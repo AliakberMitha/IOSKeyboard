@@ -1,0 +1,20 @@
+PUT THE LSD WEB APP ONLINE WITH GITHUB PAGES (free)
+===================================================
+1. github.com > + > New repository. Name it: lsd  (public). Create.
+2. "uploading an existing file" > drag EVERYTHING from this zip
+   (index.html, manifest.json, assets folder, stickers folder,
+    PAGES-STEPS.txt is optional) > Commit changes.
+3. Repo > Settings > Pages (left menu).
+   Under "Build and deployment": Source = Deploy from a branch,
+   Branch = main, folder = / (root). Save.
+4. Wait 1-2 minutes, refresh the Pages screen - it shows your link:
+   https://YOURUSERNAME.github.io/lsd/
+5. Share that link in your WhatsApp groups.
+
+FOR IPHONE USERS (tell them this):
+- Open the link in Safari.
+- Tap Share (square with arrow) > "Add to Home Screen".
+- An LSD icon appears like an app. Open it, type, tap Share Image
+  or a sticker, choose WhatsApp, pick the chat, send.
+
+Works on Android and computers too - same link.
